@@ -1,0 +1,189 @@
+<!DOCTYPE html>
+<html lang="fr">
+
+<head>
+	<meta charset="utf-8">
+	<meta http-equiv="X-UA-Compatible" content="IE=edge">
+	<title>Carte interactive JS</title>
+
+	<meta name="keywords" content="leaflet, js, carte, code creatif, ESAC" />
+	<meta name="description" content="A description.">
+	<meta name="viewport" content="width=device-width, initial-scale=1">
+
+	<link rel="stylesheet" href="lib/leaflet.css">
+	<link rel="stylesheet" href="style.css">
+
+	<script src="lib/jquery-3.3.1.min.js"></script>
+	<script src="lib/papaparse.min.js"></script>
+	<script src="lib/leaflet.js"></script>
+	<script src="https://cdn.maptiler.com/maptiler-sdk-js/v2.3.0/maptiler-sdk.umd.js"></script>
+    <link href="https://cdn.maptiler.com/maptiler-sdk-js/v2.3.0/maptiler-sdk.css" rel="stylesheet" />
+    <script src="https://cdn.maptiler.com/leaflet-maptilersdk/v2.0.0/leaflet-maptilersdk.js"></script>
+</head>
+
+
+
+<body>
+	<div id="resultats">
+		<p id="titre_explication"> Le karaté do Shotokaï, c'est quoi ? </p>
+		<p id="citation"> « Les animaux ne sont pas contractés, pourquoi l'homme le serait-il ? La souplesse et la
+			flexibilité sont des aspects naturels du corps humain, la rigidité est le signe de la mort » - Gichin
+			Funakoshi</p>
+
+		<p id="texte_explicatif1"> Le karaté do Shotokaï est une pratique du karaté fluide, traversante et non
+			compétitive. Il se différencie ainsi du karaté do Shotokan, caractérisé par une recherche de l’impact et qui
+			peut être compétitif. Le Shotokaï et le Shotokan sont aujourd’hui devenus deux styles de karaté distincts. À
+			l’origine, ils n’étaient pourtant pas comparables.
+		</p>
+
+		<p id="texte_explicatif2"> Dans le courant du XXᵉ siècle, le Karaté Do (la voie du combat à main nue) est
+			présenté pour la première fois au public, à Tokyo, par Gichin Funakoshi. Celui-ci crée ensuite un dojo qu’il
+			nomme Shotokan. -shoto est son nom d’artiste et -kan signifie « Maison » en Japonais. Vient ensuite
+			l’association de Shoto, autrement dit la Shotokaï, -kaï signifiant « Association ». L’un des premiers élèves
+			de Funakoshi, Shigeru Egami, diffuse alors le Karaté Do en Europe à l’issu de stages qu’il supervise.
+			Plusieurs de ses apprentis européens se chargent dès lors de transmettre cet art selon les
+			enseignements du maître Egami. </p>
+		<video id="video" src="videomaitremurakami.mp4" controls width="300">
+		</video>
+		<p id="liensutiles_titre"> Sources </p>
+		<p id="liensutiles"> Texte introductif tiré du site des clubs de Nancy et de Saint-Nicolas de Port (54).</p>
+		<p id="liensutiles">Fédération française de karaté (FFK): https://www.ffkarate.fr/ </p>
+		<p id="liensutiles">Fédération IKDS: https://www.ikds-karatedo-shotokai.com </p>
+		<p id="liensutiles">Fédération FEKAMT: https://www.fekamt.com </p>
+		<p id="liensutiles">Fédération KDSE: https://shotokaieurope.org </p>
+		<p id="liensutiles">Fédération FIAMT: https://www.fiamt.fr/karate-jutsu-p210583.html</p>
+		<p id="liensutiles">École Yamato Kan: https://www.yamatokan.fr/histoire-les-fondateurs/ </p>
+		<p id="liensutiles">École Mushinkai:
+			http://www.mushinkai.net/pages/french/InformationsPratiquesFrenchSite/ClubFranceFrench.htm </p>
+		<p id="liensutiles">Et tous les clubs de karaté affiliés !</p>
+		<p id="kikafe">
+			Karatographie réalisée par Hélène Ququ, étudiante en 3ème année de DNA à l'École Supérieure
+			d'Art de Cambrai et karatéka, 2024.
+		</p>
+	</div>
+	<img id="logo" src="image1.png">
+
+	<img id="logo2" src="Karatographie.png" onclick="texte();">
+
+	<div id="map">
+		<script>
+			let nom = [];
+			let style = [];
+			let lieu = [];
+			let horaires = [];
+			let specificites = [];
+			let jours = [];
+			let effectifs = [];
+			let adresse = [];
+			let tel = [];
+			let mail = [];
+			let sensei = [];
+			let liens = [];
+			let lat = [];
+			let long = [];
+			let federation = [];
+			let marker = [];
+
+			/*var southWest = L.latLng(-28.69597242668274, 71.48917722515543),
+				northEast = L.latLng(10.30721901774676, -100.4399523716398),
+				map = L.map('map', {
+					minZoom: 2,
+					maxZoom: 8,
+					// maxBounds:bounds,
+				}).setView([47.07636763978373, 3.643922919678766], 6);*/
+			//map.fitBounds(bounds); bloquer la carte
+		
+
+					const key = 'OxpEeuYIYukQsyphQn67';
+			const map = L.map('map').setView([ 47.07636763978373, 0,1], 6);
+			const mtLayer = L.maptilerLayer({
+				apiKey: key,
+				style: "ec61fd23-4a50-4435-817c-d836ffbae2c1", //optional
+			}).addTo(map);
+
+			var options = {
+				minZoom: 2,
+				maxZoom: 8,
+				opacity: 1.0,
+				tms: false,
+				noWrap: true,
+				errorTileUrl: 'media/defaut.png'
+			};
+
+			// ajouter des tiles en local :
+			// layer = L.tileLayer('{z}/{x}/{y}.png', options).addTo(map); 
+			//layer = L.tileLayer('https://tile.openstreetmap.org/{z}/{x}/{y}.png', options).addTo(map);
+			layerGroup = L.layerGroup().addTo(map);
+
+			$(document).ready(function () {
+
+				Papa.parse("shotokai.csv", {
+					download: true,
+					header: true,
+					step: function (row) {
+						nom.push(row.data[0].Nom);
+						style.push(row.data[0].Style);
+						lieu.push(row.data[0].Lieu);
+						// horaires.push(row.data[0].Horaires); 
+						// specificites.push(row.data[0].Spécificités);
+						// jours.push(row.data[0].Jours);  
+						// effectifs.push(row.data[0].Effectifs);  
+						adresse.push(row.data[0].Adresse);
+						tel.push(row.data[0].Tel);
+						mail.push(row.data[0].Mail);
+						sensei.push(row.data[0].Sensei);
+						lat.push(row.data[0].Lat);
+						long.push(row.data[0].Long);
+						federation.push(row.data[0].Federation);
+					}, complete: function (results) {
+
+						for (let i = 0; i < nom.length; i++) {
+							//console.log(nom[i]);
+							marker[i] = L.marker(L.latLng(lat[i], long[i]), { id: "m" + i, title: "couleur", alt: "couleur" });
+							let img_id = i + 1;
+							// créer des pop up avec infos  :
+							//marker[i].bindPopup("<h1 id='titre_marker'>"+nom[i]+"</h1> <p id='adresse'> " + adresse[i] +   " </p> ");
+
+							// ou ouvrir les infos des marqueurs dans une div :
+							marker[i].on('click', onMarkerClick);
+
+							// ajouter les marqueurs sur la carte :
+							layerGroup.addLayer(marker[i]);
+							map.addLayer(marker[i]);
+						}
+					}
+
+				});
+			});
+
+
+			// fonction d'affichage d'infos dans une une div :
+			var onMarkerClick = function (e) {
+				var identifiant = this.options.id;
+				identifiant = identifiant.substring(1);
+				$("#resultats").empty();
+				$("#resultats").append("<h1 id='titre_marker'>" + nom[identifiant] + "</h1>  <h2 id='style'> <b> Style : </b>" + style[identifiant] + " </h2>  <h3 id='sensei'> <b>Sensei : </b>" + sensei[identifiant] + " </h3><h4 id='adresse'><b>Adresse : </b>" + adresse[identifiant] + " </h4>  <h5 id='tel'> <b>Téléphone : </b>" + tel[identifiant] + " </h5> <h6 id='mail'>  <b>Contact :</b> " + mail[identifiant] + " </h6> <h7 id='fede'> <b>Fédération :</b> " + federation[identifiant] + " </h7>");
+
+			}
+
+
+			function texte() {
+				$("#resultats").empty();
+				$("#resultats").append("<p id='titre_explication'> Le karaté do Shotokaï, c'est quoi ? </p><p id='citation'> « Les animaux ne sont pas contractés, pourquoi l'homme le serait-il ? La souplesse et la flexibilité sont des aspects naturels du corps humain, la rigidité est le signe de la mort » - Gichin Funakoshi</p> <p id='texte_explicatif1'>  Le karaté do Shotokaï est une pratique du karaté fluide, traversante et non compétitive. Il se différencie ainsi du karaté do Shotokan, caractérisé par une recherche de l’impact et qui peut être compétitif. Le Shotokaï et le Shotokan sont aujourd’hui devenus deux styles de karaté distincts. À l’origine, ils n’étaient pourtant pas comparables.</p><p id='texte_explicatif2'> Dans le courant du XXᵉ siècle, le Karaté Do (la voie du combat à main nue) est présenté pour la première fois au public, à Tokyo, par Gichin Funakoshi. Celui-ci crée ensuite un dojo qu’il nomme Shotokan. -shoto est son nom d’artiste et -kan signifie « Maison » en Japonais. Vient ensuite l’association de Shoto, autrement dit la Shotokaï, -kaï signifiant « Association ». L’un des premiers élèves de Funakoshi, Shigeru Egami, diffuse alors le karaté do en Europe à l’issu de stages qu’il supervise. Plusieurs de ses apprentis européens se chargent dès lors de transmettre cet art selon les enseignements du maître Egami. </p> <video src='videomaitremurakami.mp4' controls width='100%'> </video><p id='liensutiles_titre'> Sources </p> <p id='liensutiles'> Texte introductif tiré du site des clubs de Nancy et de Saint-Nicolas de Port (54).</p> <p id='liensutiles'>Fédération IKDS: https://www.ikds-karatedo-shotokai.com </p><p id='liensutiles'>Fédération FEKAMT: https://www.fekamt.com </p> <p id='liensutiles'>Fédération KDSE: https://shotokaieurope.org </p> <p id='liensutiles'>École Yamato Kan: https://www.yamatokan.fr/histoire-les-fondateurs/ </p> <p id='liensutiles'>École Mushinkai: http://www.mushinkai.net/pages/french/InformationsPratiquesFrenchSite/ClubFranceFrench.htm </p> <p id='liensutiles'>Et tous les clubs de karaté affiliés !</p><p id='kikafe'> Karatographie réalisée par Hélène Ququ, étudiante en 3ème année de DNA à l'École Supérieure d'Art de Cambrai et karatéka, 2024.</p>");
+			}
+
+
+		</script>
+	</div>
+
+	<div class="legende">
+		<p>KARATOGRAPHIE </p>
+		<p id="trouvez">Trouvez votre club <br />
+			de karaté do Shotokaï
+			dans toute la France
+		</p>
+	</div>
+
+</body>
+
+</html>
